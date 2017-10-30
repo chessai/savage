@@ -1,83 +1,106 @@
-{-# LANGUAGE CPP #-}
+module Savage.Randy (
+  -- * Combinators
+    lift
 
-module Savage.Randy where
+  -- ** Shrinking
+  , shrink
+  , prune
 
-import System.Random
-import System.Random.TF
-import System.Random.TF.Gen (splitn)
-import Data.Word
-import Data.Bits
+  -- ** Size
+  , small
+  , scale
+  , resize
+  , sized
 
-#define TheGen TFGen
+  -- ** Integral
+  , integral
+  , integral_
 
-newTheGen :: IO TFGen
-newTheGen = newTFGen
+  , int
+  , int8
+  , int16
+  , int32
+  , int64
 
-bits, mask, doneBit :: Integral a => a
-bits = 14
-mask = 0x3fff
-doneBit = 0x4000
+  , word
+  , word8
+  , word16
+  , word32
+  , word64
 
-chip :: Bool -> Word32 -> TFGen -> TFGen
-chip done n g = splitn g (bits+1) (if done then m .|. doneBit else m)
-  where
-    m = n .&. mask
+  -- ** Floating-point
+  , realFloat
+  , realFrac_
+  , float
+  , double
 
-chop :: Integer -> Integer
-chop n = n `shiftR` bits
+  -- ** Enumeration
+  , enum
+  , enumBounded
+  , bool
+  , bool_
 
-stop :: Integral a => a -> Bool
-stop n = n <= mask
+  -- ** Characters
+  , binit
+  , octit
+  , digit
+  , hexit
+  , lower
+  , upper
+  , alpha
+  , alphaNum
+  , ascii
+  , latin1
+  , unicode
+  , unicodeAll
 
-mkTheGen :: Int -> TFGen
-mkTheGen = mkTFGen
+  -- ** Strings
+  , string
+  , text
+  , utf8
+  , bytes
 
--- | The "standard" QuickCheck random number generator.
--- A wrapper around either 'TFGen' on GHC, or 'StdGen'
--- on other Haskell systems.
-newtype SVGen = SVGen TheGen
+  -- ** Choice
+  , constant
+  , element
+  , choice
+  , frequency
+  , recursive
 
-instance Show SVGen where
-  showsPrec n (SVGen g) s = showsPrec n g "" ++ s
-instance Read SVGen where
-  readsPrec n xs = [(SVGen g, ys) | (g, ys) <- readsPrec n xs]
+  -- ** Conditional
+  , discard
+  , filter
+  , just
 
-instance RandomGen SVGen where
-  split (SVGen g) =
-    case split g of
-      (g1, g2) -> (SVGen g1, SVGen g2)
-  genRange (SVGen g) = genRange g
-  next (SVGen g) =
-    case next g of
-      (x, g') -> (x, SVGen g')
+  -- ** Collections
+  , maybe
+  , list
+  , seq
+  , nonEmpty
+  , set
+  , map
 
-newSVGen :: IO SVGen
-newSVGen = fmap SVGen newTheGen
+  -- ** Subterms
+  , freeze
+  , subterm
+  , subtermM
+  , subterm2
+  , subtermM2
+  , subterm3
+  , subtermM3
 
-mkSVGen :: Int -> SVGen
-mkSVGen n = SVGen (mkTheGen n)
+  -- ** Combinations & Permutations
+  , subsequence
+  , shuffle
 
-bigNatVariant :: Integer -> TheGen -> TheGen
-bigNatVariant n g
-  | g `seq` stop n = chip True (fromInteger n) g
-  | otherwise      = (bigNatVariant $! chop n) $! chip False (fromInteger n) g
+  -- * Sampling Generators
+  , sample
+  , print
+  , printTree
+  , printWith
+  , printTreeWith
+  ) where
 
-{-# INLINE natVariant #-}
-natVariant :: Integral a => a -> TheGen -> TheGen
-natVariant n g
-  | g `seq` stop n = chip True (fromIntegral n) g
-  | otherwise      = bigNatVariant (toInteger n) g
+import           Savage.Internal.Gen
 
-{-# INLINE variantTheGen #-}
-variantTheGen :: Integral a => a -> TheGen -> TheGen
-variantTheGen n g
-  | n >= 1    = natVariant (n-1) (boolVariant False g)
-  | n == 0   = natVariant (0 `asTypeOf` n) (boolVariant True g)
-  | otherwise = bigNatVariant (negate (toInteger n)) (boolVariant True g)
-
-boolVariant :: Bool -> TheGen -> TheGen
-boolVariant False = fst . split
-boolVariant True = snd . split
-
-variantSVGen :: Integral a => a -> SVGen -> SVGen
-variantSVGen n (SVGen g) = SVGen (variantTheGen n g)
+import           Prelude hiding (filter, print, maybe, map, seq)
