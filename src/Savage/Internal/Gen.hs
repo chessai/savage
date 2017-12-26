@@ -123,6 +123,8 @@ module Savage.Internal.Gen (
   , printTree
   , printWith
   , printTreeWith
+  , printOnly
+  , printWithOnly
 
   -- * Internal
   -- $internal
@@ -1532,6 +1534,24 @@ sample gen =
               pure $ nodeValue x
     in
       loop (100 :: Int)
+
+-- | Print the value produced by a generator, for the given size and seed.
+--
+printWithOnly :: (MonadIO m, Show a) => Size -> Seed -> Gen a -> m ()
+printWithOnly size seed gen =
+  liftIO $ do
+    let
+      Node x ss =
+        runIdentity . runTree $ renderNodes size seed gen
+    
+    putStrLn x
+
+-- | Run a generator and print the value produced by it.
+--
+printOnly :: (MonadIO m, Show a) => Gen a -> m ()
+printOnly gen = do
+  seed <- liftIO Seed.random
+  printWithOnly 0 seed gen
 
 -- | Print the value produced by a generator, and the first level of shrinks,
 --   for the given size and seed.
