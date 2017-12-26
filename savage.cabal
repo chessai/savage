@@ -1,4 +1,4 @@
-version: 1.0.1
+version: 1.0.2
 
 name:
   savage
@@ -40,30 +40,20 @@ source-repository head
 
 library
   build-depends:
-      base                            >= 3          && < 5
-    , ansi-terminal                   >= 0.6        && < 0.8
-    , async                           >= 2.0        && < 2.2
+      base                            >= 4          && < 5
     , bytestring                      >= 0.10       && < 0.11
-    , concurrent-output               >= 1.7        && < 1.11
     , containers                      >= 0.4        && < 0.6
-    , directory                       >= 1.2        && < 1.4
     , exceptions                      >= 0.7        && < 0.9
-    , lifted-async                    >= 0.7        && < 0.10
     , mmorph                          >= 1.0        && < 1.2
     , monad-control                   >= 1.0        && < 1.1
     , mtl                             >= 2.1        && < 2.3
-    , pretty-show                     >= 1.6        && < 1.7
     , primitive                       >= 0.6        && < 0.7
     , random                          >= 1.1        && < 1.2
     , resourcet                       >= 1.1        && < 1.2
-    , stm                             >= 2.4        && < 2.5
-    , template-haskell                >= 2.10       && < 2.13
     , text                            >= 1.1        && < 1.3
-    , th-lift                         >= 0.7        && < 0.8
     , time                            >= 1.4        && < 1.9
     , transformers                    >= 0.5        && < 0.6
     , transformers-base               >= 0.4        && < 0.5
-    , wl-pprint-annotated             >= 0.0        && < 0.2
 
   if impl(ghc < 8.0)
     build-depends:

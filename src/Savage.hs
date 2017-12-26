@@ -1,11 +1,18 @@
+-- This module is designed to be used alongside "Savage.Randy" and "Savage.Range",
+-- which should be imported qualified.
+--
+-- > import           Savage
+-- > import qualified Savage.Randy as Gen
+-- > import qualified Savage.Range as Range
+
 module Savage (
-    Distributive(..)
-  , Gen
+    Gen
   , GenT
   , MonadGen(..)
   , Range
   , Size(..)
   , Seed(..)
+  , Distributive(..)
   ) where
 
 import           Savage.Internal.Distributive (Distributive(..))
