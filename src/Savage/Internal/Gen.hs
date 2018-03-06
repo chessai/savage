@@ -154,7 +154,7 @@ module Savage.Internal.Gen (
   , renderNodes
   ) where
 
-import           Control.Applicative (Alternative(..))
+import           Control.Applicative (Alternative(..), liftA2)
 import           Control.Monad (MonadPlus(..), filterM, replicateM, ap, join)
 import           Control.Monad.Base (MonadBase(..))
 import           Control.Monad.Catch (MonadThrow(..), MonadCatch(..))
@@ -191,6 +191,8 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Maybe as Maybe
+import           Data.Semigroup (Semigroup)
+import qualified Data.Semigroup as Semigroup
 import           Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 import           Data.Set (Set)
@@ -522,6 +524,13 @@ instance (MonadGen m, Monoid w) => MonadGen (Strict.RWST r w s m) where
 
 ------------------------------------------------------------------------
 -- GenT instances
+
+instance (Monad m, Semigroup a) => Semigroup (GenT m a) where
+  (<>) = liftA2 (Semigroup.<>)
+
+instance (Monad m, Monoid a) => Monoid (GenT m a) where
+  mappend = liftA2 mappend
+  mempty  = pure mempty
 
 instance Functor m => Functor (GenT m) where
   fmap f gen =
